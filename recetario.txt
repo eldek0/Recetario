@@ -1,0 +1,33 @@
+RECETA "Brownies"
+INGREDIENTES:
+  harina 200 g
+  azúcar 0.5 kg
+  huevo 3 u
+PASOS:
+  1. Mezclar
+  2. Hornear
+Tiempo: 45 min
+Porciones: 8
+Calorías: 150
+Categorías: [Postre]
+Dificultad: MEDIA
+Tipo: VEGETARIANO
+Obs: "Ideal para acompañar con helado."
+
+RECETA "Guiso"
+INGREDIENTES:
+  lentejas 0.5 kg
+  chorizo 2 u
+  agua 1 l
+PASOS:
+  1. Hervir
+  2. Mezclar
+Tiempo: 75 min
+Porciones: 4
+Calorías: 300
+Categorías: [Principal]
+Dificultad: ALTA
+Tipo: PROTEICO
+
+CARRITO: 20 RECETAS: [Brownies, Guiso]
+MENU "ligth", CALORIAS=1000

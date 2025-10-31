@@ -1,0 +1,185 @@
+import java_cup.runtime.*;
+import java.util.*;
+
+parser code {:
+    public HashMap<String, HashMap<String, Object>> recetas = new HashMap<>();
+    public HashMap<String, Integer> resumenDificultad = new HashMap<>();
+    public double totalCalorias = 0;
+    public int cantRecetas = 0;
+
+    public void report_error(String message, Object info) {
+        System.err.println("❌ Error sintáctico: " + message);
+        if (info instanceof Symbol) {
+            Symbol s = (Symbol) info;
+            System.err.println("   en línea " + (s.left+1) + ", columna " + (s.right+1));
+        }
+    }
+
+    public void report_fatal_error(String message, Object info) {
+        report_error(message, info);
+        System.exit(1);
+    }
+:};
+
+terminal RECETA, INGREDIENTES, PASOS, TIEMPO, PORCIONES, CALORIAS, CATEGORIAS, ORIGEN, DIFICULTAD, TIPO, RECETAS;
+terminal CARRITO, MENU, CALORIAS_EQ;
+terminal COL, CM, SO, SC, PTO;
+terminal String STRING, ID, UNIDAD;
+terminal Double NUM;
+
+non terminal recetario;
+non terminal HashMap<String, Object> receta;
+non terminal HashMap<String, String> ingredientes;
+non terminal ArrayList<String> pasos, lista_ids;
+non terminal carrito, menu;
+
+start with recetario;
+
+/********************
+ *  REGLAS PRINCIPALES
+ ********************/
+
+recetario ::= receta
+             | recetario receta
+             | recetario carrito
+             | recetario menu
+             ;
+
+receta ::=
+    RECETA STRING:s
+    INGREDIENTES COL ingredientes:ing
+    PASOS COL pasos:p
+    TIEMPO COL NUM:t ID:unidad_tiempo
+    PORCIONES COL NUM:por
+    CALORIAS COL NUM:cal
+    CATEGORIAS COL SO lista_ids:cats SC
+    DIFICULTAD COL ID:dif
+    {:
+        HashMap<String,Object> receta = new HashMap<>();
+        receta.put("ingredientes", ing);
+        receta.put("pasos", p);
+        receta.put("tiempo", t + " " + unidad_tiempo);
+        receta.put("porciones", por);
+        receta.put("calorias", cal);
+        receta.put("categorias", cats);
+        receta.put("dificultad", dif);
+        parser.recetas.put(s, receta);
+
+        parser.totalCalorias += cal;
+        parser.cantRecetas++;
+        parser.resumenDificultad.put(dif, parser.resumenDificultad.getOrDefault(dif, 0) + 1);
+        System.out.println("✅ Receta cargada: " + s + " (" + dif + ", " + cal + " cal)");
+    :}
+    | RECETA STRING:s
+      INGREDIENTES COL ingredientes:ing
+      PASOS COL pasos:p
+      TIEMPO COL NUM:t ID:unidad_tiempo
+      PORCIONES COL NUM:por
+      CALORIAS COL NUM:cal
+      CATEGORIAS COL SO lista_ids:cats SC
+      DIFICULTAD COL ID:dif
+      ORIGEN COL ID:ori
+    {:
+        HashMap<String,Object> receta = new HashMap<>();
+        receta.put("ingredientes", ing);
+        receta.put("pasos", p);
+        receta.put("tiempo", t + " " + unidad_tiempo);
+        receta.put("porciones", por);
+        receta.put("calorias", cal);
+        receta.put("categorias", cats);
+        receta.put("dificultad", dif);
+        receta.put("origen", ori);
+        parser.recetas.put(s, receta);
+
+        parser.totalCalorias += cal;
+        parser.cantRecetas++;
+        parser.resumenDificultad.put(dif, parser.resumenDificultad.getOrDefault(dif, 0) + 1);
+        System.out.println("✅ Receta cargada: " + s + " (" + dif + ", " + ori + ", " + cal + " cal)");
+    :}
+    | RECETA STRING:s
+      INGREDIENTES COL ingredientes:ing
+      PASOS COL pasos:p
+      TIEMPO COL NUM:t ID:unidad_tiempo
+      PORCIONES COL NUM:por
+      CALORIAS COL NUM:cal
+      CATEGORIAS COL SO lista_ids:cats SC
+      DIFICULTAD COL ID:dif
+      TIPO COL ID:tipo
+    {:
+        HashMap<String,Object> receta = new HashMap<>();
+        receta.put("ingredientes", ing);
+        receta.put("pasos", p);
+        receta.put("tiempo", t + " " + unidad_tiempo);
+        receta.put("porciones", por);
+        receta.put("calorias", cal);
+        receta.put("categorias", cats);
+        receta.put("dificultad", dif);
+        receta.put("tipo", tipo);
+        parser.recetas.put(s, receta);
+
+        parser.totalCalorias += cal;
+        parser.cantRecetas++;
+        parser.resumenDificultad.put(dif, parser.resumenDificultad.getOrDefault(dif, 0) + 1);
+        System.out.println("✅ Receta cargada: " + s + " (" + tipo + ", " + dif + ", " + cal + " cal)");
+    :}
+    ;
+
+ingredientes ::= ID:ing NUM:c UNIDAD:u
+               {:
+                    HashMap<String, String> list = new HashMap<>();
+                    list.put(ing, c + " " + u);
+                    RESULT = list;
+               :}
+               | ingredientes:prev ID:ing NUM:c UNIDAD:u
+               {:
+                    prev.put(ing, c + " " + u);
+                    RESULT = prev;
+               :}
+               ;
+
+pasos ::= NUM:n PTO STRING:desc
+        {:
+            ArrayList<String> list = new ArrayList<>();
+            list.add(n.intValue() + ". " + desc);
+            RESULT = list;
+        :}
+        | pasos:prev NUM:n PTO STRING:desc
+        {:
+            prev.add(n.intValue() + ". " + desc);
+            RESULT = prev;
+        :}
+        ;
+
+lista_ids ::= ID:s
+            {:
+                ArrayList<String> list = new ArrayList<>();
+                list.add(s);
+                RESULT = list;
+            :}
+            | lista_ids:prev CM ID:s
+            {:
+                prev.add(s);
+                RESULT = prev;
+            :}
+            ;
+
+carrito ::= CARRITO COL NUM:pers CM RECETAS COL SO lista_ids:rec SC
+          {:
+              System.out.println("\n🛒 CARRITO PARA " + pers.intValue() + " PERSONAS");
+              for(String r : rec){
+                  if(!parser.recetas.containsKey(r))
+                      System.out.println("   ⚠️ Receta no encontrada: " + r);
+                  else
+                      System.out.println("   ✓ " + r);
+              }
+          :}
+          ;
+
+menu ::= MENU STRING:tipo CM CALORIAS_EQ NUM:max
+        {:
+            System.out.println("\n📅 MENÚ TIPO: " + tipo);
+            System.out.println("Máximo de calorías/día: " + max);
+            System.out.println("Promedio de calorías por receta: " + (parser.totalCalorias / parser.cantRecetas));
+            System.out.println("Distribución por dificultad: " + parser.resumenDificultad);
+        :}
+        ;
