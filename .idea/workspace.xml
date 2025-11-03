@@ -5,21 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0ef91bae-c255-4765-a159-08d7b8c0d555" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/java-cup-11b-runtime.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/java-cup-11b.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/jflex-full-1.9.1.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uy/edu/um/Lexer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uy/edu/um/Main.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uy/edu/um/ParserSym.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uy/edu/um/lexer.jflex" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uy/edu/um/parser.cup" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/uy/edu/um/parser.java" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/run.bat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,10 +16,10 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 8
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 8
+}</component>
   <component name="ProjectId" id="34y9pjNiJMHIDtStoMCriuxvchA" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -42,6 +29,7 @@
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
@@ -50,6 +38,7 @@
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.externalTools",
     "to.speed.mode.migration.done": "true"
   }
 }]]></component>
@@ -68,7 +57,9 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1762175131327</updated>
-      <workItem from="1762175133998" duration="589000" />
+      <workItem from="1762175133998" duration="1182000" />
+      <workItem from="1762178861193" duration="483000" />
+      <workItem from="1762179365175" duration="657000" />
     </task>
     <servers />
   </component>
