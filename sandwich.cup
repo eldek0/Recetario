@@ -37,7 +37,7 @@ parser code {:
    
 terminal  Integer QUANTITY;
 terminal  String PAN;
-terminal  SEMI, ING;
+terminal  SEMI, ING; // SEMI es el ;
    
 non terminal Object sandwiches, sandwich;
 
