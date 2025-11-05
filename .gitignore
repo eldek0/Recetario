@@ -7,3 +7,4 @@ sym.java
 .vscode
 target/
 src/
+*.java~

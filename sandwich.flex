@@ -28,7 +28,7 @@ cantidad = [1-9][0-9]*
 
 pan = "pan_blanco" | "pan_integral"
 
-ingredientes = "tomate" | "lechuga" 
+ingredientes = "tomate" | "lechuga" | "jamon"
 
 
 %%
