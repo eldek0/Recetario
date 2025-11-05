@@ -2,7 +2,6 @@
 echo === Compilando Programa ===
 
 set JFLEX_HOME=jflex
-%JFLEX_HOME%\bin\jflex sandwich.flex
 
 java -jar java-cup-11b.jar sandwich.cup
 
