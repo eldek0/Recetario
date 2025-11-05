@@ -1,3 +1,0 @@
-1 pan_integral tomate;
-10 pan_blanco lechuga;
-3 pan_multigrano jamon;
