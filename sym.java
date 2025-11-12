@@ -6,18 +6,16 @@
 /** CUP generated class containing symbol constants. */
 public class sym {
   /* terminals */
-  public static final int ING = 5;
+  public static final int UNIT = 3;
+  public static final int ING = 4;
   public static final int error = 1;
   public static final int QUANTITY = 2;
-  public static final int SEMI = 4;
-  public static final int PAN = 3;
   public static final int EOF = 0;
   public static final String[] terminalNames = new String[] {
   "EOF",
   "error",
   "QUANTITY",
-  "PAN",
-  "SEMI",
+  "UNIT",
   "ING"
   };
 }

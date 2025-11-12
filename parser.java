@@ -33,7 +33,7 @@ public class parser extends java_cup.runtime.lr_parser {
   protected static final short _production_table[][] = 
     unpackFromStrings(new String[] {
     "\000\004\000\002\002\004\000\002\002\004\000\002\002" +
-    "\003\000\002\003\006" });
+    "\003\000\002\003\005" });
 
   /** Access to production table. */
   public short[][] production_table() {return _production_table;}
@@ -41,11 +41,11 @@ public class parser extends java_cup.runtime.lr_parser {
   /** Parse-action table. */
   protected static final short[][] _action_table = 
     unpackFromStrings(new String[] {
-    "\000\011\000\004\004\005\001\002\000\006\002\013\004" +
-    "\005\001\002\000\004\005\007\001\002\000\006\002\uffff" +
-    "\004\uffff\001\002\000\004\007\010\001\002\000\004\006" +
-    "\011\001\002\000\006\002\ufffe\004\ufffe\001\002\000\006" +
-    "\002\001\004\001\001\002\000\004\002\000\001\002" });
+    "\000\010\000\004\006\004\001\002\000\004\004\011\001" +
+    "\002\000\006\002\uffff\006\uffff\001\002\000\006\002\010" +
+    "\006\004\001\002\000\006\002\001\006\001\001\002\000" +
+    "\004\002\000\001\002\000\004\005\012\001\002\000\006" +
+    "\002\ufffe\006\ufffe\001\002" });
 
   /** Access to parse-action table. */
   public short[][] action_table() {return _action_table;}
@@ -53,10 +53,10 @@ public class parser extends java_cup.runtime.lr_parser {
   /** <code>reduce_goto</code> table. */
   protected static final short[][] _reduce_table = 
     unpackFromStrings(new String[] {
-    "\000\011\000\006\002\003\003\005\001\001\000\004\003" +
-    "\011\001\001\000\002\001\001\000\002\001\001\000\002" +
+    "\000\010\000\006\002\005\003\004\001\001\000\002\001" +
+    "\001\000\002\001\001\000\004\003\006\001\001\000\002" +
     "\001\001\000\002\001\001\000\002\001\001\000\002\001" +
-    "\001\000\002\001\001" });
+    "\001" });
 
   /** Access to <code>reduce_goto</code> table. */
   public short[][] reduce_table() {return _reduce_table;}
@@ -147,26 +147,26 @@ class CUP$parser$actions {
       switch (CUP$parser$act_num)
         {
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 0: // sandwiches ::= sandwiches sandwich 
+          case 0: // ingredientes ::= ingredientes ingrediente 
             {
               Object RESULT =null;
 		
 
 //        System.out.println(table);
 
-     Integer sum = 0;
-     for (Integer f : table.values()) {
+     Float sum = 0;
+     for (Float f : table.values()) {
          sum += f;
      }
-     System.out.println ("total pedidos: "+sum);
+     System.out.println ("total de ingrediente: "+sum);
 
 
-              CUP$parser$result = parser.getSymbolFactory().newSymbol("sandwiches",0, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
+              CUP$parser$result = parser.getSymbolFactory().newSymbol("ingredientes",0, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 1: // $START ::= sandwiches EOF 
+          case 1: // $START ::= ingredientes EOF 
             {
               Object RESULT =null;
 		int start_valleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
@@ -180,26 +180,26 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 2: // sandwiches ::= sandwich 
+          case 2: // ingredientes ::= ingrediente 
             {
               Object RESULT =null;
 
-              CUP$parser$result = parser.getSymbolFactory().newSymbol("sandwiches",0, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
+              CUP$parser$result = parser.getSymbolFactory().newSymbol("ingredientes",0, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 3: // sandwich ::= QUANTITY PAN ING SEMI 
+          case 3: // ingrediente ::= ING QUANTITY UNIT 
             {
               Object RESULT =null;
-		int qleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-3)).left;
-		int qright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-3)).right;
-		Integer q = (Integer)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-3)).value;
-		int pleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)).left;
-		int pright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)).right;
-		String p = (String)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-2)).value;
+		int qleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
+		int qright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
+		Float q = (Float)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
+		int pleft = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
+		int pright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
+		String p = (String)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
 		 table.put(p,q); 
-              CUP$parser$result = parser.getSymbolFactory().newSymbol("sandwich",1, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-3)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
+              CUP$parser$result = parser.getSymbolFactory().newSymbol("ingrediente",1, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
             }
           return CUP$parser$result;
 

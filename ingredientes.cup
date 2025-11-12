@@ -39,7 +39,9 @@ terminal  Float QUANTITY;
 terminal  String UNIT;
 terminal  ING;
    
-non terminal Object sandwiches, sandwich;
+non terminal Object ingredientes, ingrediente;
+
+    ingredientes ::= ingredientes ingrediente {:
 
 //        System.out.println(table);
 
