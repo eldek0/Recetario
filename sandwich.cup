@@ -41,25 +41,11 @@ terminal  SEMI, ING; // SEMI es el ;
    
 non terminal Object sandwiches, sandwich;
 
-   sandwiches ::= sandwiches sandwich {:
+// Gramatica reglas de produccion
+sandwiches ::= sandwiches sandwich | sandwich;
 
-//        System.out.println(table);
-
-     Integer sum = 0;
-     for (Integer f : table.values()) {
-         sum += f;
-     }
-     System.out.println ("total pedidos: "+sum);
-
-:} | sandwich;   
-
-
-    sandwich ::= QUANTITY:q
-                PAN:p
-                ING
-                SEMI
-                {: table.put(p,q); :}
-
-                ;
+sandwich ::= QUANTITY:q PAN:p ING SEMI {: 
+    table.put(p, table.getOrDefault(p, 0) + q);
+:};
 
 
