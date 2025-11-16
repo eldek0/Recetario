@@ -1,8 +1,9 @@
 Comandos para compilar:
 
 set JFLEX_HOME=jflex
-jflex sandwich.flex
 java -jar java-cup-11b.jar sandwich.cup
 javac -cp java-cup-11b-runtime.jar *.java
 java -cp .;java-cup-11b-runtime.jar Main sandwich.txt
 
+set JFLEX_HOME=jflex
+java -jar java-cup-11b.jar ingredientes.cup

@@ -2,7 +2,7 @@
 echo === Compilando Programa ===
 
 set JFLEX_HOME=jflex
-set NAME=recetario
+set NAME=ingredientes
 
 :: Crear carpeta target si no existe
 if not exist target mkdir target
@@ -11,13 +11,13 @@ if not exist target mkdir target
 call jflex %NAME%.flex
 
 :: Generar parser con Cup
-java -jar java-cup-11b.jar %NAME%.cup
+java -jar jflex/lib/java-cup-11b.jar %NAME%.cup
 
 :: Compilar y colocar .class en target
-javac -cp java-cup-11b-runtime.jar -d target *.java
+javac -cp jflex/lib/java-cup-11b-runtime.jar -d target *.java
 
-echo === Corriendo Recetario ===
+echo === Corriendo %NAME% ===
 echo.
 
 :: Ejecutar desde la carpeta target
-java -cp target;java-cup-11b-runtime.jar Main %NAME%.txt
+java -cp target;jflex/lib/java-cup-11b-runtime.jar Main %NAME%.txt

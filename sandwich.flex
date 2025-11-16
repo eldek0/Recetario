@@ -1,8 +1,7 @@
-// Imports
 import java_cup.runtime.*;
       
 %%
-// Variables y codigo java 
+   
 %class Lexer
 
 %line
@@ -27,9 +26,9 @@ WhiteSpace     = {LineTerminator} | [ \t\f]
    
 cantidad = [1-9][0-9]*
 
-pan = "pan_blanco" | "pan_integral" | "pan_multigrano"
+pan = "pan_blanco" | "pan_integral"
 
-ingredientes = "tomate" | "lechuga" | "jamon"
+ingredientes = "tomate" | "lechuga" 
 
 
 %%

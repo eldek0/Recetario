@@ -1,16 +1,19 @@
 import java.io.*;
-   
+import java_cup.runtime.*;
+
 public class Main {
-  static public void main(String argv[]) {    
-    /* Start the parser */
-    try {
-      parser p = new parser(new Lexer(new FileReader(argv[0])));
-      Object result = p.parse().value;      
-    } catch (Exception e) {
-      /* do cleanup here -- possibly rethrow e */
-      e.printStackTrace();
+    public static void main(String[] args) {
+        try {
+            // Leer con UTF-8
+            FileInputStream fis = new FileInputStream(args[0]);
+            InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
+            
+            Lexer lexer = new Lexer(isr);
+            parser parser = new parser(lexer);
+            parser.parse();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
-  }
 }
-
-
