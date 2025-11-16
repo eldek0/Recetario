@@ -23,7 +23,7 @@ WhiteSpace     = [ \t\f]
 Digit          = [0-9]
 Letter         = [a-zA-ZáéíóúÁÉÍÓÚñÑ']
 
-Number         = {Digit}+(\.{Digit}+)?
+Number         = {Digit}+([\.,]{Digit}+)?
 Fraction       = {Digit}+[ \t]*"/"+[ \t]*{Digit}+
 
 Identifier     = {Letter}({Letter}|{Digit}|[_-])*
@@ -90,7 +90,8 @@ Estrellas      = "*"+
     "a"[ \t]+               { return symbol(sym.A); }
     
     {Fraction}              { return symbol(sym.FRACTION, yytext()); }
-    {Number}                { return symbol(sym.NUMBER, Double.parseDouble(yytext())); }
+    {Number}                { return new Symbol(sym.NUMBER, Double.valueOf(yytext().replace(',', '.'))); 
+}
     {String}                { return symbol(sym.STRING, yytext().substring(1, yytext().length()-1)); }
     {Identifier}            { return symbol(sym.ID, yytext()); }
     

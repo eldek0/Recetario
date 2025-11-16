@@ -67,6 +67,7 @@ non terminal String tipo_receta_valor;
 non terminal String texto_paso;
 
 precedence left COMMA;
+precedence left ID, STRING, NUMBER;
 
 start with recetario;
 
@@ -130,7 +131,6 @@ tipo_receta_valor ::= TIPO_RECETA:tipo
     :}
     ;
 
-// CORREGIDO: Versión simplificada que solo acepta 1 o 2 IDs
 nombre_ingrediente ::= ID:id
     {:
         RESULT = id;
@@ -157,7 +157,6 @@ ingrediente ::= nombre_ingrediente:nombre NUMBER:cant UNIDAD:unidad
     {:
         System.out.println("  Ingrediente: " + nombre + " a gusto");
     :}
-    // Alternativa con STRING para nombres compuestos
     | STRING:nombre NUMBER:cant UNIDAD:unidad
     {:
         System.out.println("  Ingrediente: " + nombre + " " + cant + " " + unidad);
@@ -191,17 +190,29 @@ texto_paso ::= STRING:s
     {:
         RESULT = id;
     :}
-    | texto_paso:t ID:id
+    | NUMBER:n
     {:
-        RESULT = t + " " + id;
+        RESULT = String.valueOf(n.intValue());
     :}
     | texto_paso:t STRING:s
     {:
         RESULT = t + " " + s;
     :}
+    | texto_paso:t ID:id
+    {:
+        RESULT = t + " " + id;
+    :}
+    | texto_paso:t NUMBER:n
+    {:
+        RESULT = t + " " + n.intValue();
+    :}
     ;
 
 paso ::= NUMBER:num DOT texto_paso:desc
+    {:
+        System.out.println("  Paso " + num.intValue() + ": " + desc);
+    :}
+    | NUMBER:num COMMA texto_paso:desc
     {:
         System.out.println("  Paso " + num.intValue() + ": " + desc);
     :}
@@ -226,7 +237,6 @@ calorias_valor ::= NUMBER:cal KCAL
     :}
     ;
 
-// CORREGIDO: Tiempo con prioridad a tokens específicos
 tiempo ::= HORA:h
     {:
         System.out.println("  Tiempo: " + h);
