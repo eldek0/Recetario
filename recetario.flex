@@ -44,8 +44,9 @@ Estrellas      = "*"+
 
 %%
 
+/* ------------------------Lexical Rules Section---------------------- */
+
 <YYINITIAL> {
-    // CRÍTICO: Palabras clave SIN los dos puntos
     "Recetas relacionadas"  { return symbol(sym.RECETAS_REL); }
     "INGREDIENTES"          { return symbol(sym.INGREDIENTES); }
     "Categorias"            { return symbol(sym.CATEGORIAS); }
@@ -65,11 +66,8 @@ Estrellas      = "*"+
     "MENU"                  { return symbol(sym.MENU); }
     "Obs"                   { return symbol(sym.OBS); }
     "Kcal"                  { return symbol(sym.KCAL); }
-    
-    // CRÍTICO: "gusto" debe ir ANTES que "a"
     "gusto"                 { return symbol(sym.GUSTO); }
     
-    // Tokens específicos (alta prioridad)
     {TipoReceta}            { return symbol(sym.TIPO_RECETA, yytext()); }
     {Dificultad}            { return symbol(sym.DIFICULTAD, yytext()); }
     {Categoria}             { return symbol(sym.CATEGORIA, yytext()); }
@@ -83,22 +81,16 @@ Estrellas      = "*"+
     {UnidadCantidad}        { return symbol(sym.UNIDAD, yytext()); }
     {UnidadCuchara}         { return symbol(sym.UNIDAD, yytext()); }
     
-    // Símbolos
-    ":"                     { return symbol(sym.COLON); }
+    ":"                     { return symbol(sym.DOS_PUNTOS); }
     ","                     { return symbol(sym.COMMA); }
     "."                     { return symbol(sym.DOT); }
     "["                     { return symbol(sym.LBRACKET); }
     "]"                     { return symbol(sym.RBRACKET); }
     "="                     { return symbol(sym.EQUALS); }
-    
-    // CRÍTICO: "a" debe ser una palabra completa, no parte de otra
     "a"[ \t]+               { return symbol(sym.A); }
     
-    // Números y fracciones
     {Fraction}              { return symbol(sym.FRACTION, yytext()); }
     {Number}                { return symbol(sym.NUMBER, Double.parseDouble(yytext())); }
-    
-    // Strings e identificadores (BAJA PRIORIDAD)
     {String}                { return symbol(sym.STRING, yytext().substring(1, yytext().length()-1)); }
     {Identifier}            { return symbol(sym.ID, yytext()); }
     

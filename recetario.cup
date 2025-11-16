@@ -26,7 +26,7 @@ parser code {:
     
     public void done_parsing() {
         super.done_parsing();
-        System.out.println("\n=== RESUMEN DEL RECETARIO ===");
+        System.out.println("=== RESUMEN DEL RECETARIO ===");
         System.out.println("Total de recetas: " + totalRecetas);
         System.out.println("\nRecetas por categoria:");
         for (Map.Entry<String, Integer> entry : categoriaCount.entrySet()) {
@@ -35,11 +35,13 @@ parser code {:
     }
 :};
 
+/* ------------Declaration of Terminals and Non Terminals Section----------- */
+
 terminal RECETA, INGREDIENTES, PASOS;
 terminal TIEMPO, PORCIONES, CALORIAS, KCAL;
 terminal CATEGORIAS, ORIGEN, DIFICULTAD_LABEL, TIPO;
 terminal RECETAS_REL, OBS, RECETAS_KEYWORD;
-terminal COLON, COMMA, DOT, LBRACKET, RBRACKET, EQUALS, A, GUSTO;
+terminal DOS_PUNTOS, COMMA, DOT, LBRACKET, RBRACKET, EQUALS, A, GUSTO;
 terminal CARRITO, MENU;
 terminal Double NUMBER;
 terminal String FRACTION, STRING, ID, UNIDAD;
@@ -93,11 +95,11 @@ receta ::= nombre_receta
 
 nombre_receta ::= RECETA STRING:nombre
     {:
-        System.out.println("=== Receta: " + nombre + " ===");
+        System.out.println("Receta: " + nombre);
     :}
     ;
 
-seccion_ingredientes ::= INGREDIENTES COLON lista_ingredientes
+seccion_ingredientes ::= INGREDIENTES DOS_PUNTOS lista_ingredientes
     ;
 
 lista_ingredientes ::= ingrediente
@@ -139,7 +141,6 @@ nombre_ingrediente ::= ID:id
     :}
     ;
 
-// CORREGIDO: Ingredientes más claros
 ingrediente ::= nombre_ingrediente:nombre NUMBER:cant UNIDAD:unidad
     {:
         System.out.println("  Ingrediente: " + nombre + " " + cant + " " + unidad);
@@ -175,7 +176,7 @@ ingrediente ::= nombre_ingrediente:nombre NUMBER:cant UNIDAD:unidad
     :}
     ;
 
-seccion_pasos ::= PASOS COLON lista_pasos
+seccion_pasos ::= PASOS DOS_PUNTOS lista_pasos
     ;
 
 lista_pasos ::= paso
@@ -206,10 +207,10 @@ paso ::= NUMBER:num DOT texto_paso:desc
     :}
     ;
 
-seccion_info ::= TIEMPO COLON tiempo
-                 PORCIONES COLON NUMBER:porc
-                 CALORIAS COLON calorias_valor
-                 CATEGORIAS COLON lista_categorias
+seccion_info ::= TIEMPO DOS_PUNTOS tiempo
+                 PORCIONES DOS_PUNTOS NUMBER:porc
+                 CALORIAS DOS_PUNTOS calorias_valor
+                 CATEGORIAS DOS_PUNTOS lista_categorias
     {:
         System.out.println("  Porciones: " + porc.intValue());
     :}
@@ -281,17 +282,17 @@ opciones_receta ::= /* vacio */
     | opciones_receta opcion_receta
     ;
 
-opcion_receta ::= ORIGEN COLON nombre_simple:pais
+opcion_receta ::= ORIGEN DOS_PUNTOS nombre_simple:pais
     {:
         System.out.println("  Origen: " + pais);
     :}
-    | DIFICULTAD_LABEL COLON dificultad_valor
-    | TIPO COLON tipo_receta_valor:tipo
+    | DIFICULTAD_LABEL DOS_PUNTOS dificultad_valor
+    | TIPO DOS_PUNTOS tipo_receta_valor:tipo
     {:
         System.out.println("  Tipo: " + tipo);
     :}
-    | RECETAS_REL COLON lista_recetas_rel
-    | OBS COLON STRING:obs
+    | RECETAS_REL DOS_PUNTOS lista_recetas_rel
+    | OBS DOS_PUNTOS STRING:obs
     {:
         System.out.println("  Obs: " + obs);
     :}
@@ -319,38 +320,19 @@ lista_recetas_rel ::= STRING
     | lista_recetas_rel COMMA STRING
     ;
 
-// CORREGIDO: Carrito acepta STRING e ID
-carrito ::= CARRITO COLON NUMBER RECETAS_KEYWORD COLON lista_nombres_recetas
-    {:
-        System.out.println("=== CARRITO procesado ===\n");
-    :}
-    ;
+carrito ::= CARRITO DOS_PUNTOS NUMBER RECETAS_KEYWORD DOS_PUNTOS lista_nombres_recetas;
 
 lista_nombres_recetas ::= LBRACKET nombres_items RBRACKET
     ;
 
-// CORREGIDO: Acepta ambos formatos
 nombres_items ::= STRING
     | ID
     | nombres_items COMMA STRING
     | nombres_items COMMA ID
     ;
 
-// CORREGIDO: Menu más flexible
 menu ::= MENU STRING COMMA CALORIAS EQUALS NUMBER
-    {:
-        System.out.println("=== MENU procesado ===\n");
-    :}
     | MENU ID COMMA CALORIAS EQUALS NUMBER
-    {:
-        System.out.println("=== MENU procesado ===\n");
-    :}
     | MENU STRING COMMA ID EQUALS NUMBER
-    {:
-        System.out.println("=== MENU procesado ===\n");
-    :}
     | MENU ID COMMA ID EQUALS NUMBER
-    {:
-        System.out.println("=== MENU procesado ===\n");
-    :}
     ;
