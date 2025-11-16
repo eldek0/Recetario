@@ -2,7 +2,7 @@
 echo === Compilando Programa ===
 
 set JFLEX_HOME=jflex
-set NAME=ingredientes
+set NAME=recetario
 
 :: Crear carpeta target si no existe
 if not exist target mkdir target

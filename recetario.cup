@@ -1,0 +1,260 @@
+import java_cup.runtime.*;
+import java.util.*;
+
+parser code {:
+    int totalRecetas = 0;
+    HashMap<String, Integer> categoriaCount = new HashMap<>();
+    
+    public void report_error(String message, Object info) {
+        StringBuffer m = new StringBuffer("Error");
+        if (info instanceof java_cup.runtime.Symbol) {
+            java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+            if (s.left >= 0) {
+                m.append(" en linea " + (s.left+1));
+                if (s.right >= 0)
+                    m.append(", columna " + (s.right+1));
+            }
+        }
+        m.append(" : " + message);
+        System.err.println(m);
+    }
+    
+    public void report_fatal_error(String message, Object info) {
+        report_error(message, info);
+        System.exit(1);
+    }
+    
+    public void done_parsing() {
+        super.done_parsing();
+        System.out.println("\n=== RESUMEN DEL RECETARIO ===");
+        System.out.println("Total de recetas: " + totalRecetas);
+        System.out.println("\nRecetas por categoria:");
+        for (Map.Entry<String, Integer> entry : categoriaCount.entrySet()) {
+            System.out.println("  " + entry.getKey() + ": " + entry.getValue());
+        }
+    }
+:};
+
+terminal RECETA, INGREDIENTES, PASOS;
+terminal TIEMPO, PORCIONES, CALORIAS, KCAL;
+terminal CATEGORIAS, ORIGEN, DIFICULTAD_LABEL, TIPO;
+terminal RECETAS_REL, OBS, RECETAS_KEYWORD;
+terminal COLON, COMMA, DOT, LBRACKET, RBRACKET, EQUALS, A, GUSTO;
+terminal CARRITO, MENU;
+terminal Double NUMBER;
+terminal String FRACTION, STRING, ID, UNIDAD;
+terminal String HORA, MINUTO;
+terminal String CATEGORIA, DIFICULTAD, ESTRELLAS;
+
+non terminal recetario, lista_elementos, elemento;
+non terminal receta;
+non terminal nombre_receta, seccion_ingredientes, seccion_pasos;
+non terminal seccion_info;
+non terminal lista_ingredientes, ingrediente;
+non terminal lista_pasos, paso;
+non terminal tiempo, calorias_valor;
+non terminal lista_categorias, categorias_items;
+non terminal opciones_receta, opcion_receta;
+non terminal lista_recetas_rel, dificultad_valor;
+non terminal carrito, menu;
+non terminal lista_nombres_recetas;
+
+precedence left COMMA;
+
+start with recetario;
+
+recetario ::= lista_elementos
+    ;
+
+lista_elementos ::= elemento
+    | lista_elementos elemento
+    ;
+
+elemento ::= receta
+    | carrito
+    | menu
+    ;
+
+receta ::= nombre_receta 
+           seccion_ingredientes 
+           seccion_pasos 
+           seccion_info
+           opciones_receta
+           {:
+               parser.totalRecetas++;
+               System.out.println("Receta procesada correctamente\n");
+           :}
+    ;
+
+nombre_receta ::= RECETA STRING:nombre
+    {:
+        System.out.println("=== Receta: " + nombre + " ===");
+    :}
+    ;
+
+seccion_ingredientes ::= INGREDIENTES lista_ingredientes
+    ;
+
+lista_ingredientes ::= ingrediente
+    | lista_ingredientes ingrediente
+    ;
+
+ingrediente ::= ID:nombre NUMBER:cant UNIDAD:unidad
+    {:
+        System.out.println("  Ingrediente: " + nombre + " " + cant + " " + unidad);
+    :}
+    | ID:nombre NUMBER:n FRACTION:frac UNIDAD:unidad
+    {:
+        System.out.println("  Ingrediente: " + nombre + " " + n + " " + frac + " " + unidad);
+    :}
+    | ID:nombre FRACTION:frac UNIDAD:unidad
+    {:
+        System.out.println("  Ingrediente: " + nombre + " " + frac + " " + unidad);
+    :}
+    | ID:nombre A GUSTO
+    {:
+        System.out.println("  Ingrediente: " + nombre + " a gusto");
+    :}
+    ;
+
+seccion_pasos ::= PASOS lista_pasos
+    ;
+
+lista_pasos ::= paso
+    | lista_pasos paso
+    ;
+
+paso ::= NUMBER:num DOT ID
+    {:
+        System.out.println("  Paso " + num.intValue());
+    :}
+    | NUMBER:num DOT STRING:desc
+    {:
+        System.out.println("  Paso " + num.intValue() + ": " + desc);
+    :}
+    ;
+
+seccion_info ::= TIEMPO COLON tiempo
+                 PORCIONES COLON NUMBER:porc
+                 CALORIAS COLON calorias_valor
+                 CATEGORIAS COLON lista_categorias
+    {:
+        System.out.println("  Porciones: " + porc.intValue());
+    :}
+    ;
+
+calorias_valor ::= NUMBER:cal KCAL
+    {:
+        System.out.println("  Calorias: " + cal.intValue() + " Kcal");
+    :}
+    | NUMBER:cal
+    {:
+        System.out.println("  Calorias: " + cal.intValue());
+    :}
+    ;
+
+tiempo ::= HORA
+    | MINUTO
+    | HORA MINUTO
+    | NUMBER HORA
+    | NUMBER MINUTO
+    | NUMBER HORA NUMBER MINUTO
+    ;
+
+lista_categorias ::= LBRACKET categorias_items RBRACKET
+    ;
+
+categorias_items ::= CATEGORIA:cat
+    {:
+        if (parser.categoriaCount.containsKey(cat)) {
+            parser.categoriaCount.put(cat, parser.categoriaCount.get(cat) + 1);
+        } else {
+            parser.categoriaCount.put(cat, 1);
+        }
+    :}
+    | ID:cat
+    {:
+        if (parser.categoriaCount.containsKey(cat)) {
+            parser.categoriaCount.put(cat, parser.categoriaCount.get(cat) + 1);
+        } else {
+            parser.categoriaCount.put(cat, 1);
+        }
+    :}
+    | categorias_items COMMA CATEGORIA:cat
+    {:
+        if (parser.categoriaCount.containsKey(cat)) {
+            parser.categoriaCount.put(cat, parser.categoriaCount.get(cat) + 1);
+        } else {
+            parser.categoriaCount.put(cat, 1);
+        }
+    :}
+    | categorias_items COMMA ID:cat
+    {:
+        if (parser.categoriaCount.containsKey(cat)) {
+            parser.categoriaCount.put(cat, parser.categoriaCount.get(cat) + 1);
+        } else {
+            parser.categoriaCount.put(cat, 1);
+        }
+    :}
+    ;
+
+opciones_receta ::= /* vacio */
+    | opciones_receta opcion_receta
+    ;
+
+opcion_receta ::= ORIGEN COLON ID:pais
+    {:
+        System.out.println("  Origen: " + pais);
+    :}
+    | DIFICULTAD_LABEL COLON dificultad_valor
+    | TIPO COLON ID:tipo
+    {:
+        System.out.println("  Tipo: " + tipo);
+    :}
+    | RECETAS_REL COLON lista_recetas_rel
+    | OBS COLON STRING:obs
+    {:
+        System.out.println("  Obs: " + obs);
+    :}
+    | ID:etiqueta EQUALS ID:valor
+    {:
+        System.out.println("  " + etiqueta + "=" + valor);
+    :}
+    | ID:etiqueta EQUALS STRING:valor
+    {:
+        System.out.println("  " + etiqueta + "=" + valor);
+    :}
+    ;
+
+dificultad_valor ::= DIFICULTAD:dif
+    {:
+        System.out.println("  Dificultad: " + dif);
+    :}
+    | ESTRELLAS:est
+    {:
+        System.out.println("  Dificultad: " + est);
+    :}
+    | ID:dif
+    {:
+        System.out.println("  Dificultad: " + dif);
+    :}
+    ;
+
+lista_recetas_rel ::= STRING
+    | lista_recetas_rel COMMA STRING
+    ;
+
+carrito ::= CARRITO COLON NUMBER RECETAS_KEYWORD COLON lista_nombres_recetas
+    {:
+        System.out.println("=== CARRITO procesado ===\n");
+    :}
+    ;
+
+lista_nombres_recetas ::= LBRACKET categorias_items RBRACKET
+    ;
+
+menu ::= MENU STRING COMMA ID EQUALS NUMBER
+    {:
+        System.out.println("=== MENU procesado ===\n");
+    :}
+    ;

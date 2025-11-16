@@ -1,19 +1,29 @@
 import java.io.*;
-import java_cup.runtime.*;
 
 public class Main {
     public static void main(String[] args) {
+        System.out.println("╔════════════════════════════════════════════╗");
+        System.out.println("║   ANALIZADOR DE RECETARIO DIGITAL v1.0    ║");
+        System.out.println("╚════════════════════════════════════════════╝");
+        
+        if (args.length == 0) {
+            System.err.println("Uso: java Main <archivo.txt>");
+            System.exit(1);
+        }
+        
         try {
-            // Leer con UTF-8
-            FileInputStream fis = new FileInputStream(args[0]);
-            InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
-            
-            Lexer lexer = new Lexer(isr);
+            FileReader fileReader = new FileReader(args[0]);
+            Lexer lexer = new Lexer(fileReader);
             parser parser = new parser(lexer);
+            
             parser.parse();
             
+            System.out.println("\n✓ Análisis completado exitosamente");
+            
         } catch (Exception e) {
+            System.err.println("\n✗ Error durante el análisis:");
             e.printStackTrace();
+            System.exit(1);
         }
     }
 }
