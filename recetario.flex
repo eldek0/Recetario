@@ -83,16 +83,25 @@ Estrellas      = "*"+
     
     ":"                     { return symbol(sym.DOS_PUNTOS); }
     ","                     { return symbol(sym.COMMA); }
-    "."                     { return symbol(sym.DOT); }
     "["                     { return symbol(sym.LBRACKET); }
     "]"                     { return symbol(sym.RBRACKET); }
     "="                     { return symbol(sym.EQUALS); }
     "a"[ \t]+               { return symbol(sym.A); }
     
     {Fraction}              { return symbol(sym.FRACTION, yytext()); }
-    {Number}                { return new Symbol(sym.NUMBER, Double.valueOf(yytext().replace(',', '.'))); 
-}
+    {Number}                { return new Symbol(sym.NUMBER, Double.valueOf(yytext().replace(',', '.'))); }
     {String}                { return symbol(sym.STRING, yytext().substring(1, yytext().length()-1)); }
+    
+    /* El punto SOLO se reconoce cuando está inmediatamente después de un número (sin espacios) */
+    {Number}[ \t]*"."       { 
+        String text = yytext().trim();
+        String numPart = text.substring(0, text.length()-1);
+        yypushback(1); // Devolver el punto
+        return new Symbol(sym.NUMBER, Double.valueOf(numPart.replace(',', '.'))); 
+    }
+    
+    "."                     { return symbol(sym.DOT); }
+    
     {Identifier}            { return symbol(sym.ID, yytext()); }
     
     // Ignorar espacios

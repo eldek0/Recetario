@@ -194,6 +194,26 @@ texto_paso ::= STRING:s
     {:
         RESULT = String.valueOf(n.intValue());
     :}
+    | DOT
+    {:
+        RESULT = ".";
+    :}
+    | UNIDAD:u
+    {:
+        RESULT = u;
+    :}
+    | HORA:h
+    {:
+        RESULT = h;
+    :}
+    | MINUTO:m
+    {:
+        RESULT = m;
+    :}
+    | A
+    {:
+        RESULT = "a";
+    :}
     | texto_paso:t STRING:s
     {:
         RESULT = t + " " + s;
@@ -205,6 +225,26 @@ texto_paso ::= STRING:s
     | texto_paso:t NUMBER:n
     {:
         RESULT = t + " " + n.intValue();
+    :}
+    | texto_paso:t DOT
+    {:
+        RESULT = t + ".";
+    :}
+    | texto_paso:t UNIDAD:u
+    {:
+        RESULT = t + " " + u;
+    :}
+    | texto_paso:t HORA:h
+    {:
+        RESULT = t + " " + h;
+    :}
+    | texto_paso:t MINUTO:m
+    {:
+        RESULT = t + " " + m;
+    :}
+    | texto_paso:t A
+    {:
+        RESULT = t + " a";
     :}
     ;
 
@@ -269,13 +309,13 @@ tiempo ::= HORA:h
 
 lista_categorias ::= LBRACKET categorias_items RBRACKET
     {:
-        System.out.println();
+        System.out.println(); // Nueva línea después de las categorías
     :}
     ;
 
 categorias_items ::= CATEGORIA:cat
     {:
-        System.out.print(cat);
+        System.out.print("  Categorias: " + cat);
         if (parser.categoriaCount.containsKey(cat)) {
             parser.categoriaCount.put(cat, parser.categoriaCount.get(cat) + 1);
         } else {
