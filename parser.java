@@ -194,7 +194,7 @@ class CUP$parser$actions {
               Object RESULT =null;
 		int qleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
 		int qright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
-		Float q = (Float)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
+		Integer q = (Integer)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
 		int pleft = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
 		int pright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
 		String p = (String)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;

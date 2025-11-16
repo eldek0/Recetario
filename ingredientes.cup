@@ -35,7 +35,7 @@ parser code {:
    
 /* ------------Declaration of Terminals and Non Terminals Section----------- */
    
-terminal  Float QUANTITY;
+terminal  Integer QUANTITY;
 terminal  String UNIT;
 terminal  ING;
    

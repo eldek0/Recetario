@@ -26,7 +26,7 @@ WhiteSpace     = {LineTerminator} | [ \t\f]
    
 cantidad = [1-9][0-9]*
 
-unit = "g" | "gramos" | "kg" | "kilo gramo" | "u" | "unidades"
+unidad = "g" | "gramos" | "kg" | "kilo gramo" | "u" | "unidades"
 
 ingrediente = "tomate" | "lechuga" | "harina" | "azucar" | "huevo"
 
@@ -41,7 +41,7 @@ ingrediente = "tomate" | "lechuga" | "harina" | "azucar" | "huevo"
 
 	{ingrediente}	{ System.out.print(yytext()+" "); return symbol(sym.ING);}
         {cantidad}	       { System.out.print(yytext()+" "); return symbol(sym.QUANTITY, Integer.parseInt(yytext()));} 
-	{unidad}	{ System.out.print(yytext()+" "); return symbol(sym.PAN);}
+	{unidad}	{ System.out.print(yytext()+" "); return symbol(sym.UNIT);}
 
 	{WhiteSpace}       { /* just skip what was found, do nothing */ }   
 }
