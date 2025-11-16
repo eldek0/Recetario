@@ -1,27 +1,21 @@
 import java_cup.runtime.*;
-import java.lang.Math;
 import java.util.*;
-import java.io.*;
 
 parser code {:
-    //para calcular cantidades
-    HashMap<String, Integer> table = new HashMap<>();   
-    //
+    HashMap<String, Double> table = new HashMap<>();   
+    
     public void report_error(String message, Object info) {
-   
         StringBuffer m = new StringBuffer("Error");
    
         if (info instanceof java_cup.runtime.Symbol) {
-             java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+            java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
             if (s.left >= 0) {                
                 m.append(" in line "+(s.left+1));   
                 if (s.right >= 0)                    
                     m.append(", column "+(s.right+1));
             }
         }
-   
         m.append(" : "+message);
-   
         System.err.println(m);
     }
    
@@ -29,36 +23,39 @@ parser code {:
         report_error(message, info);
         System.exit(1);
     }
+    
+    public void done_parsing() {
+        super.done_parsing();
+        // Imprimir resumen al finalizar
+        Double sum = 0.0;
+        System.out.println("\n=== Resumen ===");
+        for (Map.Entry<String, Double> entry : table.entrySet()) {
+            System.out.println(entry.getKey() + ": " + entry.getValue());
+            sum += entry.getValue();
+        }
+        System.out.println("Total: " + sum);
+    }
 :};
    
-
+terminal Double QUANTITY;
+terminal String UNIT;
+terminal String ING;
    
-/* ------------Declaration of Terminals and Non Terminals Section----------- */
-   
-terminal  Integer QUANTITY;
-terminal  String UNIT;
-terminal  ING;
-   
-non terminal Object ingredientes, ingrediente;
+non terminal lista_ingredientes, ingrediente;
 
-    ingredientes ::= ingredientes ingrediente {:
+start with lista_ingredientes;
 
-//        System.out.println(table);
+lista_ingredientes ::= lista_ingredientes ingrediente
+    | ingrediente ;
 
-     Float sum = 0;
-     for (Float f : table.values()) {
-         sum += f;
-     }
-     System.out.println ("total de ingrediente: "+sum);
-
-:} | ingrediente;
-
-
-    ingrediente ::= ING
-                QUANTITY:q
-                UNIT:p
-                {: table.put(p,q); :}
-
-                ;
-
-
+ingrediente ::= ING:i QUANTITY:q UNIT:u {: 
+        String ing = (String)i;
+        String unit = (String)u;
+        Double quantity = (Double)q;
+        
+        if (parser.table.containsKey(unit)) {
+            parser.table.put(unit, parser.table.get(unit) + quantity);
+        } else {
+            parser.table.put(unit, quantity);
+        }
+    :};

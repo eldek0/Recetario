@@ -3,14 +3,12 @@ import java_cup.runtime.*;
 %%
    
 %class Lexer
-
 %line
 %column
-    
 %cup
+%unicode
    
 %{   
-    
     private Symbol symbol(int type) {
         return new Symbol(type, yyline, yycolumn);
     }
@@ -21,32 +19,25 @@ import java_cup.runtime.*;
 %}
    
 LineTerminator = \r|\n|\r\n
-   
-WhiteSpace     = {LineTerminator} | [ \t\f]
-   
-cantidad = [1-9][0-9]*
+WhiteSpace     = [ \t\f]
+InputCharacter = [^\r\n]
+
+// Acepta enteros y decimales
+cantidad = [0-9]+(\.[0-9]+)?
 
 unidad = "g" | "gramos" | "kg" | "kilo gramo" | "u" | "unidades"
 
-ingrediente = "tomate" | "lechuga" | "harina" | "azucar" | "huevo"
-
+// Agregada tilde en azúcar y sin acentos como alternativa
+ingrediente = "tomate" | "lechuga" | "harina" | "azúcar" | "azucar" | "huevo"
 
 %%
-/* ------------------------Lexical Rules Section---------------------- */
-   
    
 <YYINITIAL> {
-   
-	";"			{ System.out.print(yytext()+" "); return symbol(sym.SEMI); }
-
-	{ingrediente}	{ System.out.print(yytext()+" "); return symbol(sym.ING);}
-        {cantidad}	       { System.out.print(yytext()+" "); return symbol(sym.QUANTITY, Integer.parseInt(yytext()));} 
-	{unidad}	{ System.out.print(yytext()+" "); return symbol(sym.UNIT);}
-
-	{WhiteSpace}       { /* just skip what was found, do nothing */ }   
+	{ingrediente}	{ System.out.print(yytext()+" "); return symbol(sym.ING, yytext());}
+	{cantidad}      { System.out.print(yytext()+" "); return symbol(sym.QUANTITY, Double.parseDouble(yytext()));} 
+	{unidad}        { System.out.print(yytext()+" "); return symbol(sym.UNIT, yytext());}
+	{LineTerminator} { System.out.println(); /* ignorar saltos de línea */ }
+	{WhiteSpace}    { /* skip */ }   
 }
 
-
-/* No token was found for the input so through an error.  Print out an
-   Illegal character message with the illegal character that was found. */
-[^]                    { throw new Error("Illegal character"+ yytext()); }
+[^]                    { throw new Error("Illegal character: '" + yytext() + "' (ASCII: " + (int)yytext().charAt(0) + ")"); }
