@@ -26,20 +26,20 @@ Letter         = [a-zA-ZáéíóúÁÉÍÓÚñÑ']
 Number         = {Digit}+(\.{Digit}+)?
 Fraction       = {Digit}+"/"{Digit}+
 
-Identifier     = {Letter}({Letter}|{Digit}|[ _-])*
+Identifier     = {Letter}({Letter}|{Digit}|[_-])*
 String         = \"[^\"]*\"
 
-UnidadPeso     = "g"|"gramos"|"kg"|"kilogramos"
-UnidadVolumen  = "l"|"litros"|"ml"|"mililitros"|"cm3"|"taza"|"tazas"
-UnidadCantidad = "u"|"unidad"|"unidades"
-UnidadCuchara  = "cuchara"|"cucharas"|"cucharita"|"cucharitas"
+UnidadPeso     = ("g"|"gramos"|"kg"|"kilogramos")
+UnidadVolumen  = ("l"|"litros"|"ml"|"mililitros"|"cm3"|"taza"|"tazas")
+UnidadCantidad = ("u"|"unidad"|"unidades")
+UnidadCuchara  = ("cuchara"|"cucharas"|"cucharita"|"cucharitas")
 UnidadGusto    = "gusto"
 
-TiempoHora     = {Digit}+h
-TiempoMin      = {Digit}+(min|m|')
+TiempoHora     = {Digit}+[ \t]?"h"
+TiempoMin      = {Digit}+[ \t]?("min"|"m"|"'")
 
 Categoria      = "Desayuno"|"Merienda"|"Principal"|"Entrada"|"Colacion"|"Postre"
-Dificultad     = "FACIL"|"MEDIA"|"DIFICIL"|"MUY FACIL"|"MUY DIFICIL"|"EXPERTO"|"ALTA"|"BAJA"
+Dificultad     = "FACIL"|"MEDIA"|"DIFICIL"|("MUY"[ ]+"FACIL")|("MUY"[ ]+"DIFICIL")|"EXPERTO"|"ALTA"|"BAJA"
 Estrellas      = "*"+
 
 %%
@@ -48,7 +48,9 @@ Estrellas      = "*"+
     "Recetas relacionadas:" { return symbol(sym.RECETAS_REL); }
     "INGREDIENTES:"         { return symbol(sym.INGREDIENTES); }
     "Categorias:"           { return symbol(sym.CATEGORIAS); }
+    "Categorías:"           { return symbol(sym.CATEGORIAS); }
     "Calorias:"             { return symbol(sym.CALORIAS); }
+    "Calorías:"             { return symbol(sym.CALORIAS); }
     "Dificultad:"           { return symbol(sym.DIFICULTAD_LABEL); }
     "Porciones:"            { return symbol(sym.PORCIONES); }
     "RECETAS"               { return symbol(sym.RECETAS_KEYWORD); }
@@ -62,6 +64,19 @@ Estrellas      = "*"+
     "Obs:"                  { return symbol(sym.OBS); }
     "Kcal"                  { return symbol(sym.KCAL); }
     
+    {Dificultad}            { return symbol(sym.DIFICULTAD, yytext()); }
+    {Categoria}             { return symbol(sym.CATEGORIA, yytext()); }
+    {Estrellas}             { return symbol(sym.ESTRELLAS, yytext()); }
+    
+    {TiempoHora}            { return symbol(sym.HORA, yytext().trim()); }
+    {TiempoMin}             { return symbol(sym.MINUTO, yytext().trim()); }
+    
+    {UnidadPeso}            { return symbol(sym.UNIDAD, yytext()); }
+    {UnidadVolumen}         { return symbol(sym.UNIDAD, yytext()); }
+    {UnidadCantidad}        { return symbol(sym.UNIDAD, yytext()); }
+    {UnidadCuchara}         { return symbol(sym.UNIDAD, yytext()); }
+    {UnidadGusto}           { return symbol(sym.GUSTO); }
+    
     ":"                     { return symbol(sym.COLON); }
     ","                     { return symbol(sym.COMMA); }
     "."                     { return symbol(sym.DOT); }
@@ -70,21 +85,8 @@ Estrellas      = "*"+
     "="                     { return symbol(sym.EQUALS); }
     "a"                     { return symbol(sym.A); }
     
-    {UnidadPeso}            { return symbol(sym.UNIDAD, yytext()); }
-    {UnidadVolumen}         { return symbol(sym.UNIDAD, yytext()); }
-    {UnidadCantidad}        { return symbol(sym.UNIDAD, yytext()); }
-    {UnidadCuchara}         { return symbol(sym.UNIDAD, yytext()); }
-    {UnidadGusto}           { return symbol(sym.GUSTO); }
-    
     {Fraction}              { return symbol(sym.FRACTION, yytext()); }
     {Number}                { return symbol(sym.NUMBER, Double.parseDouble(yytext())); }
-    
-    {TiempoHora}            { return symbol(sym.HORA, yytext()); }
-    {TiempoMin}             { return symbol(sym.MINUTO, yytext()); }
-    
-    {Categoria}             { return symbol(sym.CATEGORIA, yytext()); }
-    {Dificultad}            { return symbol(sym.DIFICULTAD, yytext()); }
-    {Estrellas}             { return symbol(sym.ESTRELLAS, yytext()); }
     
     {String}                { return symbol(sym.STRING, yytext().substring(1, yytext().length()-1)); }
     {Identifier}            { return symbol(sym.ID, yytext()); }
