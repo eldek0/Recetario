@@ -35,7 +35,7 @@ parser code {:
     // Estadisticas finales
     public void done_parsing() {
         super.done_parsing();
-        System.out.println("=== RESUMEN DEL RECETARIO ===");
+        System.out.println("\n=== RESUMEN DEL RECETARIO ===");
         System.out.println("Total de recetas: " + totalRecetas);
         System.out.println("\nRecetas por categoria:");
         
@@ -73,7 +73,8 @@ non terminal lista_pasos, paso;
 non terminal tiempo, calorias_valor;
 non terminal lista_categorias, categorias_items;
 non terminal opciones_receta, opcion_receta;
-non terminal lista_recetas_rel, dificultad_valor;
+non terminal lista_recetas_rel;
+non terminal dificultad_valor;
 non terminal carrito, menu;
 non terminal lista_nombres_recetas, nombres_items;
 
@@ -107,33 +108,29 @@ elemento ::= receta
 
 // ---Procesar receta---
 receta ::= nombre_receta 
-           {:
-               System.out.println("INGREDIENTES:");
-           :}
            seccion_ingredientes 
            seccion_pasos 
-           {:
-               System.out.println("INFORMACIÓN:");
-           :}
            seccion_info
            opciones_receta
            {:
                parser.totalRecetas++;
+               System.out.println(); // Línea en blanco entre recetas
            :}
     ;
 
 // RECETA "Nombre de la receta"
 nombre_receta ::= RECETA STRING:nombre
     {:
-        System.out.println("RECETA: " + nombre + "\n");
+        System.out.println("RECETA: " + nombre);
     :}
     ;
 
 // INGREDIENTES: [lista de ingredientes]
-seccion_ingredientes ::= INGREDIENTES DOS_PUNTOS lista_ingredientes
+seccion_ingredientes ::= INGREDIENTES DOS_PUNTOS 
     {:
-        System.out.println();  // Línea en blanco después de los ingredientes
+        System.out.println("INGREDIENTES:");
     :}
+    lista_ingredientes
     ;
 
 // Puede haber uno o más ingredientes
@@ -232,9 +229,6 @@ seccion_pasos ::= PASOS DOS_PUNTOS
         System.out.println("PASOS:");
     :}
     lista_pasos
-    {:
-        System.out.println();
-    :}
     ;
 
 // Puede haber uno o más pasos
@@ -331,11 +325,11 @@ paso ::= NUMBER:num DOT texto_paso:desc
 // Tiempo, Porciones, Calorías y Categorías
 seccion_info ::= TIEMPO DOS_PUNTOS tiempo
                  PORCIONES DOS_PUNTOS NUMBER:porc
+                 {:
+                     System.out.println("  Porciones: " + porc.intValue());
+                 :}
                  CALORIAS DOS_PUNTOS calorias_valor
                  CATEGORIAS DOS_PUNTOS lista_categorias
-    {:
-        System.out.println("  Porciones: " + porc.intValue());
-    :}
     ;
 
 // Las calorías pueden tener o no la palabra "Kcal"
@@ -368,20 +362,20 @@ tiempo ::= HORA:h
     :}
     | NUMBER:nh HORA:h
     {:
-        System.out.println("  Tiempo: " + nh + " " + h);
+        System.out.println("  Tiempo: " + nh.intValue() + " " + h);
     :}
     | NUMBER:nm MINUTO:m
     {:
-        System.out.println("  Tiempo: " + nm + " " + m);
+        System.out.println("  Tiempo: " + nm.intValue() + " " + m);
     :}
     | NUMBER:nh HORA:h NUMBER:nm MINUTO:m
     {:
-        System.out.println("  Tiempo: " + nh + " " + h + " " + nm + " " + m);
+        System.out.println("  Tiempo: " + nh.intValue() + " " + h + " " + nm.intValue() + " " + m);
     :}
     | NUMBER:num ID:unidad
     {:
         // Caso genérico para otras unidades de tiempo
-        System.out.println("  Tiempo: " + num + " " + unidad);
+        System.out.println("  Tiempo: " + num.intValue() + " " + unidad);
     :}
     ;
 
@@ -448,7 +442,7 @@ opcion_receta ::= ORIGEN DOS_PUNTOS nombre_simple:pais
     :}
     | ID:etiqueta EQUALS NUMBER:valor
     {:
-        System.out.println("  " + etiqueta + "=" + valor);
+        System.out.println("  " + etiqueta + "=" + valor.intValue());
     :}
     ;
 
@@ -464,26 +458,61 @@ dificultad_valor ::= DIFICULTAD:dif
     ;
 
 // Lista de recetas relacionadas (solo nombres)
-lista_recetas_rel ::= STRING
-    | lista_recetas_rel COMMA STRING
+lista_recetas_rel ::= STRING:receta
+    {:
+        System.out.print("  Recetas relacionadas: " + receta);
+    :}
+    | lista_recetas_rel COMMA STRING:receta
+    {:
+        System.out.print(", " + receta);
+    :}
     ;
 
 // CARRITO: 3 RECETAS: ["Receta1", "Receta2", "Receta3"]
-carrito ::= CARRITO DOS_PUNTOS NUMBER RECETAS_KEYWORD DOS_PUNTOS lista_nombres_recetas;
+carrito ::= CARRITO DOS_PUNTOS NUMBER:cant RECETAS_KEYWORD DOS_PUNTOS lista_nombres_recetas
+    {:
+        System.out.println("CARRITO: " + cant.intValue() + " recetas");
+    :}
+    ;
 
 // la lista de nombres va entre corchetes
 lista_nombres_recetas ::= LBRACKET nombres_items RBRACKET
     ;
 
 // Puede haber strings o IDs (nombres con/sin comillas)
-nombres_items ::= STRING
-    | ID
-    | nombres_items COMMA STRING
-    | nombres_items COMMA ID
+nombres_items ::= STRING:nombre
+    {:
+        System.out.println("  - " + nombre);
+    :}
+    | ID:nombre
+    {:
+        System.out.println("  - " + nombre);
+    :}
+    | nombres_items COMMA STRING:nombre
+    {:
+        System.out.println("  - " + nombre);
+    :}
+    | nombres_items COMMA ID:nombre
+    {:
+        System.out.println("  - " + nombre);
+    :}
     ;
 
-menu ::= MENU STRING COMMA CALORIAS EQUALS NUMBER
-    | MENU ID COMMA CALORIAS EQUALS NUMBER
-    | MENU STRING COMMA ID EQUALS NUMBER
-    | MENU ID COMMA ID EQUALS NUMBER
+// MENU: nombre, calorias=valor
+menu ::= MENU STRING:nombre COMMA CALORIAS EQUALS NUMBER:cal
+    {:
+        System.out.println("MENU: " + nombre + ", Calorias=" + cal.intValue());
+    :}
+    | MENU ID:nombre COMMA CALORIAS EQUALS NUMBER:cal
+    {:
+        System.out.println("MENU: " + nombre + ", Calorias=" + cal.intValue());
+    :}
+    | MENU STRING:nombre COMMA ID:campo EQUALS NUMBER:valor
+    {:
+        System.out.println("MENU: " + nombre + ", " + campo + "=" + valor.intValue());
+    :}
+    | MENU ID:nombre COMMA ID:campo EQUALS NUMBER:valor
+    {:
+        System.out.println("MENU: " + nombre + ", " + campo + "=" + valor.intValue());
+    :}
     ;
