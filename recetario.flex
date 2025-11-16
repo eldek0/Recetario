@@ -24,7 +24,7 @@ Digit          = [0-9]
 Letter         = [a-zA-ZáéíóúÁÉÍÓÚñÑ']
 
 Number         = {Digit}+(\.{Digit}+)?
-Fraction       = {Digit}+"/"{Digit}+
+Fraction       = {Digit}+[ \t]*"/"+[ \t]*{Digit}+
 
 Identifier     = {Letter}({Letter}|{Digit}|[_-])*
 String         = \"[^\"]*\"
@@ -33,37 +33,44 @@ UnidadPeso     = ("g"|"gramos"|"kg"|"kilogramos")
 UnidadVolumen  = ("l"|"litros"|"ml"|"mililitros"|"cm3"|"taza"|"tazas")
 UnidadCantidad = ("u"|"unidad"|"unidades")
 UnidadCuchara  = ("cuchara"|"cucharas"|"cucharita"|"cucharitas")
-UnidadGusto    = "gusto"
 
-TiempoHora     = {Digit}+[ \t]?"h"
-TiempoMin      = {Digit}+[ \t]?("min"|"m"|"'")
+TiempoHora     = {Digit}+[ \t]*"h"
+TiempoMin      = {Digit}+[ \t]*("min"|"m"|"'")
 
 Categoria      = "Desayuno"|"Merienda"|"Principal"|"Entrada"|"Colacion"|"Postre"
-Dificultad     = "FACIL"|"MEDIA"|"DIFICIL"|("MUY"[ ]+"FACIL")|("MUY"[ ]+"DIFICIL")|"EXPERTO"|"ALTA"|"BAJA"
+Dificultad     = "FACIL"|"MEDIA"|"DIFICIL"|("MUY"[ \t]+"FACIL")|("MUY"[ \t]+"DIFICIL")|"EXPERTO"|"ALTA"|"BAJA"
+TipoReceta     = "VEGETARIANO"|"VEGANO"|"PROTEICO"|"BAJO EN CALORIAS"|"SIN GLUTEN"|"SIN LACTOSA"
 Estrellas      = "*"+
 
 %%
 
 <YYINITIAL> {
-    "Recetas relacionadas:" { return symbol(sym.RECETAS_REL); }
-    "INGREDIENTES:"         { return symbol(sym.INGREDIENTES); }
-    "Categorias:"           { return symbol(sym.CATEGORIAS); }
-    "Categorías:"           { return symbol(sym.CATEGORIAS); }
-    "Calorias:"             { return symbol(sym.CALORIAS); }
-    "Calorías:"             { return symbol(sym.CALORIAS); }
-    "Dificultad:"           { return symbol(sym.DIFICULTAD_LABEL); }
-    "Porciones:"            { return symbol(sym.PORCIONES); }
+    // CRÍTICO: Palabras clave SIN los dos puntos
+    "Recetas relacionadas"  { return symbol(sym.RECETAS_REL); }
+    "INGREDIENTES"          { return symbol(sym.INGREDIENTES); }
+    "Categorias"            { return symbol(sym.CATEGORIAS); }
+    "Categorías"            { return symbol(sym.CATEGORIAS); }
+    "Calorias"              { return symbol(sym.CALORIAS); }
+    "Calorías"              { return symbol(sym.CALORIAS); }
+    "CALORIAS"              { return symbol(sym.CALORIAS); }
+    "Dificultad"            { return symbol(sym.DIFICULTAD_LABEL); }
+    "Porciones"             { return symbol(sym.PORCIONES); }
     "RECETAS"               { return symbol(sym.RECETAS_KEYWORD); }
     "RECETA"                { return symbol(sym.RECETA); }
-    "PASOS:"                { return symbol(sym.PASOS); }
-    "Tiempo:"               { return symbol(sym.TIEMPO); }
-    "Origen:"               { return symbol(sym.ORIGEN); }
+    "PASOS"                 { return symbol(sym.PASOS); }
+    "Tiempo"                { return symbol(sym.TIEMPO); }
+    "Origen"                { return symbol(sym.ORIGEN); }
     "CARRITO"               { return symbol(sym.CARRITO); }
-    "Tipo:"                 { return symbol(sym.TIPO); }
+    "Tipo"                  { return symbol(sym.TIPO); }
     "MENU"                  { return symbol(sym.MENU); }
-    "Obs:"                  { return symbol(sym.OBS); }
+    "Obs"                   { return symbol(sym.OBS); }
     "Kcal"                  { return symbol(sym.KCAL); }
     
+    // CRÍTICO: "gusto" debe ir ANTES que "a"
+    "gusto"                 { return symbol(sym.GUSTO); }
+    
+    // Tokens específicos (alta prioridad)
+    {TipoReceta}            { return symbol(sym.TIPO_RECETA, yytext()); }
     {Dificultad}            { return symbol(sym.DIFICULTAD, yytext()); }
     {Categoria}             { return symbol(sym.CATEGORIA, yytext()); }
     {Estrellas}             { return symbol(sym.ESTRELLAS, yytext()); }
@@ -75,24 +82,30 @@ Estrellas      = "*"+
     {UnidadVolumen}         { return symbol(sym.UNIDAD, yytext()); }
     {UnidadCantidad}        { return symbol(sym.UNIDAD, yytext()); }
     {UnidadCuchara}         { return symbol(sym.UNIDAD, yytext()); }
-    {UnidadGusto}           { return symbol(sym.GUSTO); }
     
+    // Símbolos
     ":"                     { return symbol(sym.COLON); }
     ","                     { return symbol(sym.COMMA); }
     "."                     { return symbol(sym.DOT); }
     "["                     { return symbol(sym.LBRACKET); }
     "]"                     { return symbol(sym.RBRACKET); }
     "="                     { return symbol(sym.EQUALS); }
-    "a"                     { return symbol(sym.A); }
     
+    // CRÍTICO: "a" debe ser una palabra completa, no parte de otra
+    "a"[ \t]+               { return symbol(sym.A); }
+    
+    // Números y fracciones
     {Fraction}              { return symbol(sym.FRACTION, yytext()); }
     {Number}                { return symbol(sym.NUMBER, Double.parseDouble(yytext())); }
     
+    // Strings e identificadores (BAJA PRIORIDAD)
     {String}                { return symbol(sym.STRING, yytext().substring(1, yytext().length()-1)); }
     {Identifier}            { return symbol(sym.ID, yytext()); }
     
+    // Ignorar espacios
     {LineTerminator}        { /* ignorar */ }
     {WhiteSpace}            { /* ignorar */ }
 }
 
+// Error para caracteres ilegales
 [^]                         { throw new Error("Caracter ilegal en linea " + (yyline+1) + ": '" + yytext() + "'"); }

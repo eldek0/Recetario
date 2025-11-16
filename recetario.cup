@@ -45,6 +45,7 @@ terminal Double NUMBER;
 terminal String FRACTION, STRING, ID, UNIDAD;
 terminal String HORA, MINUTO;
 terminal String CATEGORIA, DIFICULTAD, ESTRELLAS;
+terminal String TIPO_RECETA;
 
 non terminal recetario, lista_elementos, elemento;
 non terminal receta;
@@ -60,6 +61,8 @@ non terminal carrito, menu;
 non terminal lista_nombres_recetas, nombres_items;
 non terminal String nombre_ingrediente;
 non terminal String nombre_simple;
+non terminal String tipo_receta_valor;
+non terminal String texto_paso;
 
 precedence left COMMA;
 
@@ -94,7 +97,7 @@ nombre_receta ::= RECETA STRING:nombre
     :}
     ;
 
-seccion_ingredientes ::= INGREDIENTES lista_ingredientes
+seccion_ingredientes ::= INGREDIENTES COLON lista_ingredientes
     ;
 
 lista_ingredientes ::= ingrediente
@@ -111,6 +114,21 @@ nombre_simple ::= ID:id
     :}
     ;
 
+tipo_receta_valor ::= TIPO_RECETA:tipo
+    {:
+        RESULT = tipo;
+    :}
+    | ID:id
+    {:
+        RESULT = id;
+    :}
+    | STRING:s
+    {:
+        RESULT = s;
+    :}
+    ;
+
+// CORREGIDO: Versión simplificada que solo acepta 1 o 2 IDs
 nombre_ingrediente ::= ID:id
     {:
         RESULT = id;
@@ -119,16 +137,9 @@ nombre_ingrediente ::= ID:id
     {:
         RESULT = id1 + " " + id2;
     :}
-    | ID:id1 ID:id2 ID:id3
-    {:
-        RESULT = id1 + " " + id2 + " " + id3;
-    :}
-    | ID:id1 ID:id2 ID:id3 ID:id4
-    {:
-        RESULT = id1 + " " + id2 + " " + id3 + " " + id4;
-    :}
     ;
 
+// CORREGIDO: Ingredientes más claros
 ingrediente ::= nombre_ingrediente:nombre NUMBER:cant UNIDAD:unidad
     {:
         System.out.println("  Ingrediente: " + nombre + " " + cant + " " + unidad);
@@ -145,20 +156,51 @@ ingrediente ::= nombre_ingrediente:nombre NUMBER:cant UNIDAD:unidad
     {:
         System.out.println("  Ingrediente: " + nombre + " a gusto");
     :}
+    // Alternativa con STRING para nombres compuestos
+    | STRING:nombre NUMBER:cant UNIDAD:unidad
+    {:
+        System.out.println("  Ingrediente: " + nombre + " " + cant + " " + unidad);
+    :}
+    | STRING:nombre NUMBER:n FRACTION:frac UNIDAD:unidad
+    {:
+        System.out.println("  Ingrediente: " + nombre + " " + n + " " + frac + " " + unidad);
+    :}
+    | STRING:nombre FRACTION:frac UNIDAD:unidad
+    {:
+        System.out.println("  Ingrediente: " + nombre + " " + frac + " " + unidad);
+    :}
+    | STRING:nombre A GUSTO
+    {:
+        System.out.println("  Ingrediente: " + nombre + " a gusto");
+    :}
     ;
 
-seccion_pasos ::= PASOS lista_pasos
+seccion_pasos ::= PASOS COLON lista_pasos
     ;
 
 lista_pasos ::= paso
     | lista_pasos paso
     ;
 
-paso ::= NUMBER:num DOT STRING:desc
+texto_paso ::= STRING:s
     {:
-        System.out.println("  Paso " + num.intValue() + ": " + desc);
+        RESULT = s;
     :}
-    | NUMBER:num DOT nombre_ingrediente:desc
+    | ID:id
+    {:
+        RESULT = id;
+    :}
+    | texto_paso:t ID:id
+    {:
+        RESULT = t + " " + id;
+    :}
+    | texto_paso:t STRING:s
+    {:
+        RESULT = t + " " + s;
+    :}
+    ;
+
+paso ::= NUMBER:num DOT texto_paso:desc
     {:
         System.out.println("  Paso " + num.intValue() + ": " + desc);
     :}
@@ -183,18 +225,34 @@ calorias_valor ::= NUMBER:cal KCAL
     :}
     ;
 
-tiempo ::= HORA
-    | MINUTO
-    | HORA MINUTO
-    | NUMBER HORA
-    | NUMBER MINUTO
-    | NUMBER HORA NUMBER MINUTO
+// CORREGIDO: Tiempo con prioridad a tokens específicos
+tiempo ::= HORA:h
+    {:
+        System.out.println("  Tiempo: " + h);
+    :}
+    | MINUTO:m
+    {:
+        System.out.println("  Tiempo: " + m);
+    :}
+    | HORA:h MINUTO:m
+    {:
+        System.out.println("  Tiempo: " + h + " " + m);
+    :}
+    | NUMBER:nh HORA:h
+    {:
+        System.out.println("  Tiempo: " + nh + " " + h);
+    :}
+    | NUMBER:nm MINUTO:m
+    {:
+        System.out.println("  Tiempo: " + nm + " " + m);
+    :}
+    | NUMBER:nh HORA:h NUMBER:nm MINUTO:m
+    {:
+        System.out.println("  Tiempo: " + nh + " " + h + " " + nm + " " + m);
+    :}
     | NUMBER:num ID:unidad
     {:
-        // Aceptar "45 min" como NUMBER seguido de ID
-        if (unidad.equals("min") || unidad.equals("m") || unidad.equals("h")) {
-            System.out.println("  Tiempo: " + num + " " + unidad);
-        }
+        System.out.println("  Tiempo: " + num + " " + unidad);
     :}
     ;
 
@@ -228,7 +286,7 @@ opcion_receta ::= ORIGEN COLON nombre_simple:pais
         System.out.println("  Origen: " + pais);
     :}
     | DIFICULTAD_LABEL COLON dificultad_valor
-    | TIPO COLON nombre_simple:tipo
+    | TIPO COLON tipo_receta_valor:tipo
     {:
         System.out.println("  Tipo: " + tipo);
     :}
@@ -261,6 +319,7 @@ lista_recetas_rel ::= STRING
     | lista_recetas_rel COMMA STRING
     ;
 
+// CORREGIDO: Carrito acepta STRING e ID
 carrito ::= CARRITO COLON NUMBER RECETAS_KEYWORD COLON lista_nombres_recetas
     {:
         System.out.println("=== CARRITO procesado ===\n");
@@ -270,13 +329,27 @@ carrito ::= CARRITO COLON NUMBER RECETAS_KEYWORD COLON lista_nombres_recetas
 lista_nombres_recetas ::= LBRACKET nombres_items RBRACKET
     ;
 
+// CORREGIDO: Acepta ambos formatos
 nombres_items ::= STRING
     | ID
     | nombres_items COMMA STRING
     | nombres_items COMMA ID
     ;
 
-menu ::= MENU STRING COMMA ID EQUALS NUMBER
+// CORREGIDO: Menu más flexible
+menu ::= MENU STRING COMMA CALORIAS EQUALS NUMBER
+    {:
+        System.out.println("=== MENU procesado ===\n");
+    :}
+    | MENU ID COMMA CALORIAS EQUALS NUMBER
+    {:
+        System.out.println("=== MENU procesado ===\n");
+    :}
+    | MENU STRING COMMA ID EQUALS NUMBER
+    {:
+        System.out.println("=== MENU procesado ===\n");
+    :}
+    | MENU ID COMMA ID EQUALS NUMBER
     {:
         System.out.println("=== MENU procesado ===\n");
     :}
