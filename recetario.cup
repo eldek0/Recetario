@@ -2,13 +2,20 @@ import java_cup.runtime.*;
 import java.util.*;
 
 parser code {:
+    // Contador de recetas procesadas
     int totalRecetas = 0;
+    
+    // hashmap para contar cuántas recetas hay de cada categoría
+    // la clave es el nombre de la categoría y el valor es la cantidad
     HashMap<String, Integer> categoriaCount = new HashMap<>();
     
+    // Aca reporta el error
     public void report_error(String message, Object info) {
         StringBuffer m = new StringBuffer("Error");
+        
         if (info instanceof java_cup.runtime.Symbol) {
             java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+            
             if (s.left >= 0) {
                 m.append(" en linea " + (s.left+1));
                 if (s.right >= 0)
@@ -19,36 +26,44 @@ parser code {:
         System.err.println(m);
     }
     
+    // Si hay un error, lo imprime y sale del programa
     public void report_fatal_error(String message, Object info) {
         report_error(message, info);
         System.exit(1);
     }
     
+    // Estadisticas finales
     public void done_parsing() {
         super.done_parsing();
         System.out.println("=== RESUMEN DEL RECETARIO ===");
         System.out.println("Total de recetas: " + totalRecetas);
         System.out.println("\nRecetas por categoria:");
+        
+        // Recorremos el HashMap y mostramos cada categoría con su cantidad
         for (Map.Entry<String, Integer> entry : categoriaCount.entrySet()) {
             System.out.println("  " + entry.getKey() + ": " + entry.getValue());
         }
     }
 :};
 
-/* ------------Declaration of Terminals and Non Terminals Section----------- */
+/* ------------Declaración de Terminales y No Terminales----------- */
 
+// Terminales: son las palabras reservadas y símbolos que reconoce el lexer
 terminal RECETA, INGREDIENTES, PASOS;
 terminal TIEMPO, PORCIONES, CALORIAS, KCAL;
 terminal CATEGORIAS, ORIGEN, DIFICULTAD_LABEL, TIPO;
 terminal RECETAS_REL, OBS, RECETAS_KEYWORD;
+
 terminal DOS_PUNTOS, COMMA, DOT, LBRACKET, RBRACKET, EQUALS, A, GUSTO;
 terminal CARRITO, MENU;
+
 terminal Double NUMBER;
 terminal String FRACTION, STRING, ID, UNIDAD;
 terminal String HORA, MINUTO;
 terminal String CATEGORIA, DIFICULTAD, ESTRELLAS;
 terminal String TIPO_RECETA;
 
+// No terminales: son las reglas gramaticales
 non terminal recetario, lista_elementos, elemento;
 non terminal receta;
 non terminal nombre_receta, seccion_ingredientes, seccion_pasos;
@@ -61,6 +76,7 @@ non terminal opciones_receta, opcion_receta;
 non terminal lista_recetas_rel, dificultad_valor;
 non terminal carrito, menu;
 non terminal lista_nombres_recetas, nombres_items;
+
 non terminal String nombre_ingrediente;
 non terminal String nombre_simple;
 non terminal String tipo_receta_valor;
@@ -69,44 +85,64 @@ non terminal String texto_paso;
 precedence left COMMA;
 precedence left ID, STRING, NUMBER;
 
+// El símbolo inicial de la gramática (por dónde empieza el análisis)
 start with recetario;
 
+/* ------------Reglas de la Gramática----------- */
+
+// Un recetario es una lista de elementos (recetas, carritos, menús)
 recetario ::= lista_elementos
     ;
 
+// La lista puede tener uno o varios elementos
 lista_elementos ::= elemento
     | lista_elementos elemento
     ;
 
+// Un elemento puede ser una receta, un carrito o un menu
 elemento ::= receta
     | carrito
     | menu
     ;
 
+// ---Procesar receta---
 receta ::= nombre_receta 
+           {:
+               System.out.println("INGREDIENTES:");
+           :}
            seccion_ingredientes 
            seccion_pasos 
+           {:
+               System.out.println("INFORMACIÓN:");
+           :}
            seccion_info
            opciones_receta
            {:
                parser.totalRecetas++;
-               System.out.println("Receta procesada correctamente\n");
            :}
     ;
 
+// RECETA "Nombre de la receta"
 nombre_receta ::= RECETA STRING:nombre
     {:
-        System.out.println("Receta: " + nombre);
+        System.out.println("RECETA: " + nombre + "\n");
     :}
     ;
 
+// INGREDIENTES: [lista de ingredientes]
 seccion_ingredientes ::= INGREDIENTES DOS_PUNTOS lista_ingredientes
+    {:
+        System.out.println();  // Línea en blanco después de los ingredientes
+    :}
     ;
 
+// Puede haber uno o más ingredientes
 lista_ingredientes ::= ingrediente
     | lista_ingredientes ingrediente
     ;
 
+// Un nombre simple puede ser un ID o un STRING
+// Esto se usa para nombres de países, tipos, etc.
 nombre_simple ::= ID:id
     {:
         RESULT = id;
@@ -117,6 +153,7 @@ nombre_simple ::= ID:id
     :}
     ;
 
+// Tipo de receta puede venir de distintas formas
 tipo_receta_valor ::= TIPO_RECETA:tipo
     {:
         RESULT = tipo;
@@ -131,6 +168,9 @@ tipo_receta_valor ::= TIPO_RECETA:tipo
     :}
     ;
 
+// El nombre de un ingrediente puede ser:
+// - Una palabra (ej: "sal")
+// - Dos palabras (ej: "aceite oliva")
 nombre_ingrediente ::= ID:id
     {:
         RESULT = id;
@@ -141,47 +181,70 @@ nombre_ingrediente ::= ID:id
     :}
     ;
 
+// INGREDIENTE: puede escribirse de varias formas
+// Ejemplos:
+// - harina 500 g
+// - leche 1 1/2 l
+// - sal 1/4 cucharita
+// - pimienta a gusto
 ingrediente ::= nombre_ingrediente:nombre NUMBER:cant UNIDAD:unidad
     {:
-        System.out.println("  Ingrediente: " + nombre + " " + cant + " " + unidad);
+        System.out.println("  - " + nombre + ": " + cant + " " + unidad);
     :}
     | nombre_ingrediente:nombre NUMBER:n FRACTION:frac UNIDAD:unidad
     {:
-        System.out.println("  Ingrediente: " + nombre + " " + n + " " + frac + " " + unidad);
+        // Caso: numero + fraccion (ej: 1 1/2 tazas)
+        System.out.println("  - " + nombre + ": " + n + " " + frac + " " + unidad);
     :}
     | nombre_ingrediente:nombre FRACTION:frac UNIDAD:unidad
     {:
-        System.out.println("  Ingrediente: " + nombre + " " + frac + " " + unidad);
+        // Caso: solo fraccion (ej: 1/2 taza)
+        System.out.println("  - " + nombre + ": " + frac + " " + unidad);
     :}
     | nombre_ingrediente:nombre A GUSTO
     {:
-        System.out.println("  Ingrediente: " + nombre + " a gusto");
+        // Caso especial: ingrediente "a gusto"
+        System.out.println("  - " + nombre + ": a gusto");
     :}
+    // Las mismas reglas pero permitiendo STRING en lugar de nombre_ingrediente
+    // (para ingredientes con nombres entre comillas)
     | STRING:nombre NUMBER:cant UNIDAD:unidad
     {:
-        System.out.println("  Ingrediente: " + nombre + " " + cant + " " + unidad);
+        System.out.println("  - " + nombre + ": " + cant + " " + unidad);
     :}
     | STRING:nombre NUMBER:n FRACTION:frac UNIDAD:unidad
     {:
-        System.out.println("  Ingrediente: " + nombre + " " + n + " " + frac + " " + unidad);
+        System.out.println("  - " + nombre + ": " + n + " " + frac + " " + unidad);
     :}
     | STRING:nombre FRACTION:frac UNIDAD:unidad
     {:
-        System.out.println("  Ingrediente: " + nombre + " " + frac + " " + unidad);
+        System.out.println("  - " + nombre + ": " + frac + " " + unidad);
     :}
     | STRING:nombre A GUSTO
     {:
-        System.out.println("  Ingrediente: " + nombre + " a gusto");
+        System.out.println("  - " + nombre + ": a gusto");
     :}
     ;
 
-seccion_pasos ::= PASOS DOS_PUNTOS lista_pasos
+// PASOS: [lista de pasos]
+seccion_pasos ::= PASOS DOS_PUNTOS 
+    {:
+        System.out.println("PASOS:");
+    :}
+    lista_pasos
+    {:
+        System.out.println();
+    :}
     ;
 
+// Puede haber uno o más pasos
 lista_pasos ::= paso
     | lista_pasos paso
     ;
 
+// texto_paso: representa el texto descriptivo de un paso
+// Puede incluir strings, IDs, números, puntos, unidades, etc.
+// Esta regla es recursiva para permitir textos largos con varias palabras
 texto_paso ::= STRING:s
     {:
         RESULT = s;
@@ -214,6 +277,8 @@ texto_paso ::= STRING:s
     {:
         RESULT = "a";
     :}
+    // Casos recursivos: texto_paso + algo más
+    // Esto permite construir frases largas juntando palabras
     | texto_paso:t STRING:s
     {:
         RESULT = t + " " + s;
@@ -248,6 +313,10 @@ texto_paso ::= STRING:s
     :}
     ;
 
+// Un paso es: número + punto/coma + texto
+// Ejemplos:
+// 1. Mezclar los ingredientes
+// 2, Hornear durante 30 minutos
 paso ::= NUMBER:num DOT texto_paso:desc
     {:
         System.out.println("  Paso " + num.intValue() + ": " + desc);
@@ -258,6 +327,8 @@ paso ::= NUMBER:num DOT texto_paso:desc
     :}
     ;
 
+// Sección de información obligatoria de la receta
+// Tiempo, Porciones, Calorías y Categorías
 seccion_info ::= TIEMPO DOS_PUNTOS tiempo
                  PORCIONES DOS_PUNTOS NUMBER:porc
                  CALORIAS DOS_PUNTOS calorias_valor
@@ -267,6 +338,7 @@ seccion_info ::= TIEMPO DOS_PUNTOS tiempo
     :}
     ;
 
+// Las calorías pueden tener o no la palabra "Kcal"
 calorias_valor ::= NUMBER:cal KCAL
     {:
         System.out.println("  Calorias: " + cal.intValue() + " Kcal");
@@ -277,6 +349,11 @@ calorias_valor ::= NUMBER:cal KCAL
     :}
     ;
 
+// El tiempo puede expresarse de varias formas:
+// - Solo horas: "2h"
+// - Solo minutos: "30min"
+// - Ambos: "1h 30min"
+// - Con numero delante: "2 horas 30 minutos"
 tiempo ::= HORA:h
     {:
         System.out.println("  Tiempo: " + h);
@@ -303,28 +380,38 @@ tiempo ::= HORA:h
     :}
     | NUMBER:num ID:unidad
     {:
+        // Caso genérico para otras unidades de tiempo
         System.out.println("  Tiempo: " + num + " " + unidad);
     :}
     ;
 
+// Las categorías van entre corchetes: [Desayuno, Principal]
 lista_categorias ::= LBRACKET categorias_items RBRACKET
     {:
         System.out.println(); // Nueva línea después de las categorías
     :}
     ;
 
+// Procesamos las categorías (puede haber una o varias separadas por comas)
 categorias_items ::= CATEGORIA:cat
     {:
         System.out.print("  Categorias: " + cat);
+        
+        // Actualizamos el contador de esta categoría en el HashMap
         if (parser.categoriaCount.containsKey(cat)) {
+            // Si ya existe, incrementamos el contador
             parser.categoriaCount.put(cat, parser.categoriaCount.get(cat) + 1);
         } else {
+            // Si es nueva, la agregamos con valor 1
             parser.categoriaCount.put(cat, 1);
         }
     :}
     | categorias_items COMMA CATEGORIA:cat
     {:
+        // Caso recursivo: ya hay categorías y agregamos otra
         System.out.print(", " + cat);
+        
+        // Mismo proceso de conteo
         if (parser.categoriaCount.containsKey(cat)) {
             parser.categoriaCount.put(cat, parser.categoriaCount.get(cat) + 1);
         } else {
@@ -333,10 +420,13 @@ categorias_items ::= CATEGORIA:cat
     :}
     ;
 
-opciones_receta ::= /* vacio */
-    | opciones_receta opcion_receta
+// Las opciones son campos opcionales de una receta
+// Puede no haber ninguna, o haber varias
+opciones_receta ::= /* vacio - no hay opciones */
+    | opciones_receta opcion_receta  // Recursivo: 0 o más opciones
     ;
 
+// Tipos de opciones que puede tener una receta
 opcion_receta ::= ORIGEN DOS_PUNTOS nombre_simple:pais
     {:
         System.out.println("  Origen: " + pais);
@@ -351,6 +441,7 @@ opcion_receta ::= ORIGEN DOS_PUNTOS nombre_simple:pais
     {:
         System.out.println("  Obs: " + obs);
     :}
+    // Opciones personalizadas con formato: etiqueta=valor
     | ID:etiqueta EQUALS nombre_simple:valor
     {:
         System.out.println("  " + etiqueta + "=" + valor);
@@ -361,6 +452,7 @@ opcion_receta ::= ORIGEN DOS_PUNTOS nombre_simple:pais
     :}
     ;
 
+// La dificultad puede ser un texto o estrellas
 dificultad_valor ::= DIFICULTAD:dif
     {:
         System.out.println("  Dificultad: " + dif);
@@ -371,15 +463,19 @@ dificultad_valor ::= DIFICULTAD:dif
     :}
     ;
 
+// Lista de recetas relacionadas (solo nombres)
 lista_recetas_rel ::= STRING
     | lista_recetas_rel COMMA STRING
     ;
 
+// CARRITO: 3 RECETAS: ["Receta1", "Receta2", "Receta3"]
 carrito ::= CARRITO DOS_PUNTOS NUMBER RECETAS_KEYWORD DOS_PUNTOS lista_nombres_recetas;
 
+// la lista de nombres va entre corchetes
 lista_nombres_recetas ::= LBRACKET nombres_items RBRACKET
     ;
 
+// Puede haber strings o IDs (nombres con/sin comillas)
 nombres_items ::= STRING
     | ID
     | nombres_items COMMA STRING
